@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<title>Csv import project</title>
+	</head>
+	<body>
+		{% if messages %}
+			{% for message in messages %}
+				{% if message.level == 40 %}
+					{{message}}
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+		<div id="content">
+			{% block content %}
+			{% endblock %}
+		</div>
+	</body>
+</html>

@@ -1,0 +1,10 @@
+{% extends "csv_import/index.html" %}
+{% block content %}
+<h1>View/Update upload</h1>
+{% if upload %}
+	<h4>File: {{upload.name}}</h4><br>
+	<a href="{% url 'csv_import:uploads_delete' upload.pk %}">Delete</a>
+{% else %}
+	<p>Nothing to show.</p>
+{% endif %}
+{% endblock %}

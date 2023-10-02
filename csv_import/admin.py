@@ -1,3 +1,4 @@
 from django.contrib import admin
+from csv_import.models import *
 
-# Register your models here.
+admin.site.register(Upload)

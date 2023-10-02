@@ -1,0 +1,13 @@
+{% extends "csv_import/index.html" %}
+{% block content %}
+<h1>Uploads list</h1>
+{% if uploads_list %}
+	<ul>
+		{% for upload in uploads_list %}
+			<li><a href="{% url 'csv_import:uploads_edit' upload.pk %}">{{ upload.name }}</a></li>
+		{% endfor %}
+	</ul>
+{% else %}
+	<p>No uploads to show</p>
+{% endif %}
+{% endblock %}
