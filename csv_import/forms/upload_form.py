@@ -1,5 +1,10 @@
 from django import forms
-from django.forms import modelform_factory
+from csv_import.models import *
 
-class UploadForm(forms.Form):
-    pass
+class UploadForm(forms.ModelForm):
+    class Meta:
+        model = Upload
+        fields = ['name', 'file']
+        widgets = {
+            'name' : forms.TextInput(),
+        }

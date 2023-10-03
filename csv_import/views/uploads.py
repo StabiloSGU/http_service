@@ -1,10 +1,11 @@
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
+from django.views.generic.edit import FormView
 from django.http import Http404, HttpResponseRedirect
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
-from csv_import.forms.upload_form import *
-from django.urls import reverse
+from csv_import.forms.upload_form import UploadForm
+from django.urls import reverse, reverse_lazy
 
 from csv_import.models import *
 
@@ -42,3 +43,13 @@ def uploads_delete_view(request, pk):
     upload_to_delete.delete()
     return HttpResponseRedirect(reverse('csv_import:uploads_list'))
     
+
+class UploadsAddView(FormView):
+    template_name = "csv_import/uploads_add.html"
+    form_class = UploadForm
+    success_url = reverse_lazy("csv_import:uploads_list")
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
+
