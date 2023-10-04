@@ -1,9 +1,31 @@
 {% extends "csv_import/index.html" %}
 {% block content %}
 <h1>View/Update upload</h1>
-{% if upload %}
-	<h4>File: {{upload.name}}</h4><br>
-	<a href="{% url 'csv_import:uploads_delete' upload.pk %}">Delete</a>
+{% if edit_view_objects %}
+	<h4>File: {{edit_view_objects.obj.name}}</h4><br>
+	<div>
+		<table>
+			<tr>
+				<th>Header</th>
+				{% for header in edit_view_objects.file_info.0 %}
+					<th>{{header}}</th>
+				{% endfor %}
+			</tr>
+			<tr>
+				<td>Value type</td>
+				{% for type_name in edit_view_objects.file_info.1 %}
+					<td>{{type_name}}</td>
+				{% endfor %}
+			</tr>
+			<tr>
+				<td>Value</td>
+				{% for cell in edit_view_objects.file_info.2 %}
+					<td>{{cell}}</td>
+				{% endfor %}
+			</tr>
+		</table>
+	</div>
+	<a href="{% url 'csv_import:uploads_delete' edit_view_objects.obj.pk %}">Delete</a>
 {% else %}
 	<p>Nothing to show.</p>
 {% endif %}
