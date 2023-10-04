@@ -7,6 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from csv_import.forms.upload_form import UploadForm
 from django.urls import reverse, reverse_lazy
 from csv_import.lib.csv_helper_funcs import *
+from django.db import transaction
 
 from csv_import.models import *
 
@@ -46,8 +47,9 @@ class UploadsAddView(FormView):
     form_class = UploadForm
     success_url = reverse_lazy("csv_import:uploads_list")
 
+    @transaction.atomic()
     def form_valid(self, form):
         obj = form.save()
-        parse_csv_to_database(obj.pk)
+        #parse_csv_to_database(obj.pk)
         return super().form_valid(form)
 
