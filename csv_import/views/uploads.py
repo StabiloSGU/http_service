@@ -26,18 +26,27 @@ class UploadsEditView(DetailView):
     def get_object(self, queryset=None):
         try:
             obj = self.model.objects.get(pk=self.kwargs.get('pk'))
+            file_info = self.get_file_info(obj.pk)
         except ObjectDoesNotExist:
             messages.add_message(self.request, messages.ERROR, "Invalid file id")
             raise Http404
+
         edit_view_objects = {
             'obj': obj,
-            'file_info': get_file_column_info(obj.pk)
+            'file_info': file_info
         }
         return edit_view_objects
 
+    def get_file_info(self, pk):
+        obj = Upload.objects.get(pk=pk)
+        if UploadContentsFields.objects.filter(file=obj.pk).exists():
+            return get_file_column_info(file_pk=obj.pk)
+        else:
+            return get_file_column_info_using_pandas(file_pk=obj.pk)
+
 
 def uploads_delete_view(request, pk):
-    upload_to_delete = Upload.objects.get(pk=pk)#request.POST.get('id'))
+    upload_to_delete = Upload.objects.get(pk=pk)
     upload_to_delete.delete()
     return HttpResponseRedirect(reverse('csv_import:uploads_list'))
     
@@ -50,6 +59,29 @@ class UploadsAddView(FormView):
     @transaction.atomic()
     def form_valid(self, form):
         obj = form.save()
-        #parse_csv_to_database(obj.pk)
+        match int(form.cleaned_data['upload_choice']):
+            case ImportSettings.DB:
+                parse_csv_to_database(obj.pk)
+            case ImportSettings.PANDAS:
+                print('Selected pandas')
+                pass
+            case _:
+                print('selected unaccounted import setting')
+                print(form.cleaned_data['upload_choice'], type(form.cleaned_data['upload_choice']))
         return super().form_valid(form)
 
+
+class UploadsDetailView(DetailView):
+    model = Upload
+    context_object_name = 'detail_view_objects'
+    template_name = "csv_import/uploads_detail.html"
+
+    # что мне нужно? мне нужно вывести файл либо из датафрейма панд
+    # либо из базы данных
+    # я хочу получать get параметры, обязательно нужен pk
+    # затем исходя из того, где лежит файл (в бд или на диске), собирать новый объект
+    # можно собирать его всегда в датафрейм, чтобы упростить работу
+    # получив датафрейм я хочу его вывести в виде таблицы на страницу
+    # если помимо pk есть и другие параметры, надо применять их как фильтры к файлу
+
+    # начнём с того, чтобы получать pk и выводить файл в виде таблицы

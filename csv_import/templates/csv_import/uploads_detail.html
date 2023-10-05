@@ -1,0 +1,14 @@
+{% extends "csv_import/index.html" %}
+{% block content %}
+<h1>Details</h1>
+{% if detail_view_objects %}
+    {{detail_view_objects.name}}<br>
+    {{detail_view_objects.file}}
+{% else %}
+	<p>Nothing to show.</p>
+{% endif %}
+<br>
+<a href="{% url 'csv_import:uploads_edit' detail_view_objects.pk %}">Return</a>
+<br>
+<a href="{% url 'csv_import:uploads_list' %}">To list</a>
+{% endblock %}

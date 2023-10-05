@@ -2,7 +2,7 @@ from csv_import.models.upload_contents import *
 from datetime import datetime
 from csv_import.models import *
 import csv
-
+import pandas as pd
 
 def parse_csv_to_database(file_id) -> None:
     file = Upload.objects.get(pk=file_id)
@@ -49,4 +49,25 @@ def get_file_column_info(file_pk: int, row_number: int = 2) -> tuple:
         cell = UploadContentsFieldValues.objects.get(field=header, row_num=row_number)
         column_types.append(determine_type(cell.value).__name__)
         row_values.append(cell.value)
+    return (header_names, column_types,row_values)
+
+
+# def parse_csv_using_pandas(file_pk):
+#     file_path = Upload.objects.get(pk=file_pk).file.path
+#     print(file_path)
+
+def get_file_column_info_using_pandas(file_pk: int, row_number = 0) -> tuple:
+    file_path = Upload.objects.get(pk=file_pk).file.path
+    #open file
+    df = pd.read_csv(file_path)
+    # get header
+    header_names = (header for header in df.columns)
+    # get cell types
+    column_types = []
+    # get cell values of row num provided
+    row_values = []
+    for cell in df.iloc[row_number]:
+        column_types.append(type(cell).__name__)
+        row_values.append(cell)
+    #return tuple
     return (header_names, column_types,row_values)

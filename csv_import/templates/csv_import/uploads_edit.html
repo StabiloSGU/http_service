@@ -25,8 +25,13 @@
 			</tr>
 		</table>
 	</div>
+	<br>
+	<a href="{% url 'csv_import:uploads_detail' edit_view_objects.obj.pk %}">Details</a>
+	<br>
 	<a href="{% url 'csv_import:uploads_delete' edit_view_objects.obj.pk %}">Delete</a>
 {% else %}
 	<p>Nothing to show.</p>
 {% endif %}
+<br>
+<a href="{% url 'csv_import:uploads_list' %}">To list</a>
 {% endblock %}
