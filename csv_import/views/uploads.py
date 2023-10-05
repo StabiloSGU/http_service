@@ -73,7 +73,7 @@ class UploadsAddView(FormView):
 
 class UploadsDetailView(DetailView):
     model = Upload
-    context_object_name = 'detail_view_objects'
+    context_object_name = 'detail_view_data'
     template_name = "csv_import/uploads_detail.html"
 
     # что мне нужно? мне нужно вывести файл либо из датафрейма панд
@@ -85,3 +85,13 @@ class UploadsDetailView(DetailView):
     # если помимо pk есть и другие параметры, надо применять их как фильтры к файлу
 
     # начнём с того, чтобы получать pk и выводить файл в виде таблицы
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        # фильтры применять тут
+        return obj
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        # тут можно вернуть параметры фильтрации
+        data['param'] = self.request.GET.get('parameter')
+        return data
