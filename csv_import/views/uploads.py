@@ -86,12 +86,12 @@ class UploadsDetailView(DetailView):
 
     # начнём с того, чтобы получать pk и выводить файл в виде таблицы
     def get_object(self, queryset=None):
-        obj = super().get_object(queryset)
+        file = super().get_object(queryset)
         # фильтры применять тут
         return obj
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         # тут можно вернуть параметры фильтрации
-        data['param'] = self.request.GET.get('parameter')
+        #data['param'] = self.request.GET.get('parameter')
         return data

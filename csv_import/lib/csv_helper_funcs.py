@@ -1,6 +1,7 @@
 from csv_import.models.upload_contents import *
 from datetime import datetime
 from csv_import.models import *
+from django.db.models import F
 import csv
 import pandas as pd
 
@@ -52,9 +53,28 @@ def get_file_column_info(file_pk: int, row_number: int = 2) -> tuple:
     return (header_names, column_types,row_values)
 
 
-# def parse_csv_using_pandas(file_pk):
-#     file_path = Upload.objects.get(pk=file_pk).file.path
-#     print(file_path)
+def get_df_from_file_using_database(file_pk: int):
+    #получить файл
+    file = Upload.objects.get(pk=file_pk)
+    #получить заголовки
+    headers = UploadContentsFields.objects.filter(file=file)
+    #получить значения
+    #цикл: для каждого заголовка брать все строки данного заголовка (отсортированные по row_num возр)
+    data = {}
+    for header in headers:
+        field_values_column = UploadContentsFieldValues.objects.filter(field=header).order_by(F("row_num").asc())
+        column = [cell.value for cell in field_values_column]
+        data[header.name] = column
+    #собрать словарь для df
+    df = pd.DataFrame(data)
+    #вернуть df
+    return df
+
+def get_df_from_file_using_pandas(file_pk: int):
+    file_path = Upload.objects.get(pk=file_pk).file.path
+    df = pd.read_csv(file_path)
+    return df
+
 
 def get_file_column_info_using_pandas(file_pk: int, row_number = 0) -> tuple:
     file_path = Upload.objects.get(pk=file_pk).file.path
