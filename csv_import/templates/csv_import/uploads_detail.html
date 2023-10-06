@@ -2,8 +2,28 @@
 {% block content %}
 <h1>Details</h1>
 {% if detail_view_data %}
-    {{detail_view_data.name}}<br>
-    {{detail_view_data.file}}<br>
+    Filename: {{detail_view_data.name}}<br>
+    Filepath: {{detail_view_data.file}}<br>
+    <div>
+        <table>
+            <tr>
+                {% for header in df.headers %}
+                <th>
+                    {{header}}
+                </th>
+                {% endfor %}
+            </tr>
+            {% for row in df.rows %}
+            <tr>
+                {% for cell in row %}
+                    <td>
+                        {{cell}}
+                    </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
 {% else %}
 	<p>Nothing to show.</p>
 {% endif %}

@@ -75,6 +75,13 @@ def get_df_from_file_using_pandas(file_pk: int):
     df = pd.read_csv(file_path)
     return df
 
+def determine_upload_method(file_pk: int) -> int:
+    file = Upload.objects.get(pk=file_pk)
+    if UploadContentsFields.objects.filter(file=file.pk).exists():
+        return ImportSettings.DB
+    else:
+        return ImportSettings.PANDAS
+
 
 def get_file_column_info_using_pandas(file_pk: int, row_number = 0) -> tuple:
     file_path = Upload.objects.get(pk=file_pk).file.path
@@ -91,3 +98,13 @@ def get_file_column_info_using_pandas(file_pk: int, row_number = 0) -> tuple:
         row_values.append(cell)
     #return tuple
     return (header_names, column_types,row_values)
+
+def convert_df_to_dict(df: pd.DataFrame) -> dict:
+    header_names = (header for header in df.columns)
+    df_len = len(df.index)
+    rows = []
+    for i in range(df_len):
+        row = []
+        for header in header_names:
+            cell = df[header]
+    return {"headers": header_names, "rows": rows}

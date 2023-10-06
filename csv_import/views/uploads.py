@@ -88,10 +88,23 @@ class UploadsDetailView(DetailView):
     def get_object(self, queryset=None):
         file = super().get_object(queryset)
         # фильтры применять тут
+        obj = file
         return obj
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         # тут можно вернуть параметры фильтрации
         #data['param'] = self.request.GET.get('parameter')
+        match determine_upload_method(data['object'].pk):
+            case ImportSettings.DB:
+                df = get_df_from_file_using_database(data['object'].pk)
+                data['df'] = convert_df_to_dict(df)
+            case ImportSettings.PANDAS:
+                df = get_df_from_file_using_database(data['object'].pk)
+                data['df'] = convert_df_to_dict(df)
+            case _:
+                print('Unaccounted import type')
+        print('rows')
+        for row in data['df']['rows']:
+            print(list(row))
         return data
