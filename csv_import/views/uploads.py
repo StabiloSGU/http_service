@@ -77,7 +77,6 @@ class UploadsDetailView(DetailView):
     context_object_name = 'detail_view_data'
     template_name = "csv_import/uploads_detail.html"
 
-
     def get_object(self, queryset=None):
         file = super().get_object(queryset)
         return file
@@ -90,11 +89,12 @@ class UploadsDetailView(DetailView):
             case ImportSettings.PANDAS:
                 df = get_df_from_file_using_pandas(data['object'].pk)
             case _:
+                df = pd.DataFrame()
                 print('Unaccounted import type')
         data['filters_and_values'] = self.find_filters_and_values_in_request()
         if not df.empty and (data['filters_and_values']['search']\
-         or data['filters_and_values']['sorting']):
-             df = self.filter_file(df, data['filters_and_values'])
+                             or data['filters_and_values']['sorting']):
+            df = self.filter_file(df, data['filters_and_values'])
         data['df'] = convert_df_to_dict(df)
         return data
 
@@ -116,12 +116,11 @@ class UploadsDetailView(DetailView):
         for keyword, value in filters['search'].items():
             if value:
                 filtered_file = filtered_file[filtered_file[keyword].astype(str).str.contains(value)]
-        #apply search. add filtering by several fields including asc and desc at the same time
         sorting_columns = []
         sorting_order = []
         for keyword, value in filters['sorting'].items():
             if value == 'asc' or value == 'desc':
                 sorting_columns.append(keyword)
                 sorting_order.append(True if value=='asc' else False)
-        filtered_file = filtered_file.sort_values(by=sorting_columns, ascending=sorting_order) #placeholder!
+        filtered_file = filtered_file.sort_values(by=sorting_columns, ascending=sorting_order)
         return filtered_file
