@@ -4,6 +4,7 @@ from csv_import.models import *
 from django.db.models import F
 import csv
 import pandas as pd
+import numpy as np
 
 def parse_csv_to_database(file_id) -> None:
     file = Upload.objects.get(pk=file_id)
@@ -25,7 +26,6 @@ def parse_csv_to_database(file_id) -> None:
                     new_value.save()
 
 def determine_type(val):
-    # could use pandas but reinventing the wheel is better
     types = (
         (int, int),
         (float, float),
@@ -54,20 +54,14 @@ def get_file_column_info(file_pk: int, row_number: int = 2) -> tuple:
 
 
 def get_df_from_file_using_database(file_pk: int):
-    #получить файл
     file = Upload.objects.get(pk=file_pk)
-    #получить заголовки
     headers = UploadContentsFields.objects.filter(file=file)
-    #получить значения
-    #цикл: для каждого заголовка брать все строки данного заголовка (отсортированные по row_num возр)
     data = {}
     for header in headers:
         field_values_column = UploadContentsFieldValues.objects.filter(field=header).order_by(F("row_num").asc())
         column = [cell.value for cell in field_values_column]
         data[header.name] = column
-    #собрать словарь для df
     df = pd.DataFrame(data)
-    #вернуть df
     return df
 
 def get_df_from_file_using_pandas(file_pk: int):
@@ -85,26 +79,18 @@ def determine_upload_method(file_pk: int) -> int:
 
 def get_file_column_info_using_pandas(file_pk: int, row_number = 0) -> tuple:
     file_path = Upload.objects.get(pk=file_pk).file.path
-    #open file
     df = pd.read_csv(file_path)
-    # get header
     header_names = (header for header in df.columns)
-    # get cell types
     column_types = []
-    # get cell values of row num provided
     row_values = []
     for cell in df.iloc[row_number]:
         column_types.append(type(cell).__name__)
         row_values.append(cell)
-    #return tuple
     return (header_names, column_types,row_values)
 
 def convert_df_to_dict(df: pd.DataFrame) -> dict:
-    header_names = (header for header in df.columns)
+    header_names = [header for header in df.columns]
     df_len = len(df.index)
-    rows = []
-    for i in range(df_len):
-        row = []
-        for header in header_names:
-            cell = df[header]
+    to_np_array = df.to_numpy()
+    rows = to_np_array.reshape(df_len, len(df.columns))
     return {"headers": header_names, "rows": rows}

@@ -1,4 +1,5 @@
 {% extends "csv_import/index.html" %}
+{% load dict_filters %}
 {% block content %}
 <h1>Details</h1>
 {% if detail_view_data %}
@@ -6,11 +7,23 @@
     Filepath: {{detail_view_data.file}}<br>
     <div>
         <table>
+            <form method="get" action="{% url 'csv_import:uploads_detail' detail_view_data.pk %}">
             <tr>
                 {% for header in df.headers %}
-                <th>
-                    {{header}}
-                </th>
+                    <th>
+                    {{filters_and_values.header}}
+                        <input type="text" name="search_{{header}}" value="{{filters_and_values.search|dict_filter:header}}">
+                        </input>
+                    </th>
+                {% endfor %}
+            <tr>
+            <input type="submit" style="display:none">
+            </form>
+            <tr>
+                {% for header in df.headers %}
+                    <th>
+                        {{header}}
+                    </th>
                 {% endfor %}
             </tr>
             {% for row in df.rows %}
@@ -25,7 +38,7 @@
         </table>
     </div>
 {% else %}
-	<p>Nothing to show.</p>
+    <p>Nothing to show.</p>
 {% endif %}
 <br>
 <a href="{% url 'csv_import:uploads_edit' detail_view_data.pk %}">Return</a>

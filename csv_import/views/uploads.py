@@ -8,6 +8,7 @@ from csv_import.forms.upload_form import UploadForm
 from django.urls import reverse, reverse_lazy
 from csv_import.lib.csv_helper_funcs import *
 from django.db import transaction
+import numpy as np
 
 from csv_import.models import *
 
@@ -49,7 +50,7 @@ def uploads_delete_view(request, pk):
     upload_to_delete = Upload.objects.get(pk=pk)
     upload_to_delete.delete()
     return HttpResponseRedirect(reverse('csv_import:uploads_list'))
-    
+
 
 class UploadsAddView(FormView):
     template_name = "csv_import/uploads_add.html"
@@ -76,35 +77,51 @@ class UploadsDetailView(DetailView):
     context_object_name = 'detail_view_data'
     template_name = "csv_import/uploads_detail.html"
 
-    # что мне нужно? мне нужно вывести файл либо из датафрейма панд
-    # либо из базы данных
-    # я хочу получать get параметры, обязательно нужен pk
-    # затем исходя из того, где лежит файл (в бд или на диске), собирать новый объект
-    # можно собирать его всегда в датафрейм, чтобы упростить работу
-    # получив датафрейм я хочу его вывести в виде таблицы на страницу
-    # если помимо pk есть и другие параметры, надо применять их как фильтры к файлу
 
-    # начнём с того, чтобы получать pk и выводить файл в виде таблицы
     def get_object(self, queryset=None):
         file = super().get_object(queryset)
-        # фильтры применять тут
-        obj = file
-        return obj
+        return file
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        # тут можно вернуть параметры фильтрации
-        #data['param'] = self.request.GET.get('parameter')
         match determine_upload_method(data['object'].pk):
             case ImportSettings.DB:
                 df = get_df_from_file_using_database(data['object'].pk)
-                data['df'] = convert_df_to_dict(df)
             case ImportSettings.PANDAS:
-                df = get_df_from_file_using_database(data['object'].pk)
-                data['df'] = convert_df_to_dict(df)
+                df = get_df_from_file_using_pandas(data['object'].pk)
             case _:
                 print('Unaccounted import type')
-        print('rows')
-        for row in data['df']['rows']:
-            print(list(row))
+        data['filters_and_values'] = self.find_filters_and_values_in_request()
+        if not df.empty and (data['filters_and_values']['search']\
+         or data['filters_and_values']['sorting']):
+             df = self.filter_file(df, data['filters_and_values'])
+        data['df'] = convert_df_to_dict(df)
         return data
+
+    def find_filters_and_values_in_request(self) -> dict:
+        filters = {}
+        search = {}
+        sorting = {}
+        for keyword in self.request.GET:
+            if keyword.startswith('search_'):
+                search[keyword[7:]] = self.request.GET[keyword]
+            if keyword.startswith('sort_'):
+                sorting[keyword[5:]] = self.request.GET[keyword]
+        filters['search'] = search
+        filters['sorting'] = sorting
+        return filters
+
+    def filter_file(self, file, filters):
+        filtered_file = file
+        for keyword, value in filters['search'].items():
+            if value:
+                filtered_file = filtered_file[filtered_file[keyword].astype(str).str.contains(value)]
+        #apply search. add filtering by several fields including asc and desc at the same time
+        sorting_columns = []
+        sorting_order = []
+        for keyword, value in filters['sorting'].items():
+            if value == 'asc' or value == 'desc':
+                sorting_columns.append(keyword)
+                sorting_order.append(True if value=='asc' else False)
+        filtered_file = filtered_file.sort_values(by=sorting_columns, ascending=sorting_order) #placeholder!
+        return filtered_file
