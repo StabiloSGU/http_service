@@ -8,7 +8,6 @@ from csv_import.forms.upload_form import UploadForm
 from django.urls import reverse, reverse_lazy
 from csv_import.lib.csv_helper_funcs import *
 from django.db import transaction
-import numpy as np
 
 from csv_import.models import *
 
@@ -121,6 +120,6 @@ class UploadsDetailView(DetailView):
         for keyword, value in filters['sorting'].items():
             if value == 'asc' or value == 'desc':
                 sorting_columns.append(keyword)
-                sorting_order.append(True if value=='asc' else False)
+                sorting_order.append(True if value == 'asc' else False)
         filtered_file = filtered_file.sort_values(by=sorting_columns, ascending=sorting_order)
         return filtered_file

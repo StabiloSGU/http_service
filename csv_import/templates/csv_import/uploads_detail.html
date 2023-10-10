@@ -7,14 +7,13 @@
     Filepath: {{detail_view_data.file}}<br>
     <div>
         <table>
-            <form method="get" action="{% url 'csv_import:uploads_detail' detail_view_data.pk %}">
+            <form id="filter_and_sort_form" method="get" action="{% url 'csv_import:uploads_detail' detail_view_data.pk %}">
             <tr>
                 {% for header in df.headers %}
                     <th>
                     {{filters_and_values.header}}
-                        <input type="text" name="search_{{header}}" value="{{filters_and_values.search|dict_filter:header}}">
-                        </input>
-                        <input type="hidden" name=sorting_{{header}} value="none"></input>
+                        <input type="text" name="search_{{header}}" value="{{filters_and_values.search|dict_filter:header}}" />
+                        <input type="hidden" name="sorting_{{header}}" id="sorting_{{header}}" value="{{filters_and_values.sorting|dict_filter:header}}" />
                     </th>
                 {% endfor %}
             <tr>
@@ -23,7 +22,7 @@
             <tr>
                 {% for header in df.headers %}
                     <th>
-                        {{header}}
+                        <a href="#" class="sorting">{{header}}</a>{% if filters_and_values.sorting|dict_filter:header == 'asc' %} ↑ {% elif filters_and_values.sorting|dict_filter:header == 'desc' %} ↓ {% endif %}
                     </th>
                 {% endfor %}
             </tr>
