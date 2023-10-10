@@ -37,6 +37,7 @@ class UploadsEditView(DetailView):
         }
         return edit_view_objects
 
+    # TODO: static?
     def get_file_info(self, pk):
         obj = Upload.objects.get(pk=pk)
         if UploadContentsFields.objects.filter(file=obj.pk).exists():
