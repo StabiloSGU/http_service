@@ -14,6 +14,7 @@
                     {{filters_and_values.header}}
                         <input type="text" name="search_{{header}}" value="{{filters_and_values.search|dict_filter:header}}">
                         </input>
+                        <input type="hidden" name=sorting_{{header}} value="none"></input>
                     </th>
                 {% endfor %}
             <tr>

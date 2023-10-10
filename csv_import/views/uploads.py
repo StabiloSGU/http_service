@@ -105,8 +105,8 @@ class UploadsDetailView(DetailView):
         for keyword in self.request.GET:
             if keyword.startswith('search_'):
                 search[keyword[7:]] = self.request.GET[keyword]
-            if keyword.startswith('sort_'):
-                sorting[keyword[5:]] = self.request.GET[keyword]
+            if keyword.startswith('sorting_'):
+                sorting[keyword[8:]] = self.request.GET[keyword]
         filters['search'] = search
         filters['sorting'] = sorting
         return filters
