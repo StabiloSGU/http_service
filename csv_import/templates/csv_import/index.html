@@ -7,6 +7,7 @@
 		<link rel="stylesheet" href="{% static 'csv_import/table_style.css' %}">
 	</head>
 	<body>
+		{% include "csv_import/header.html" %}
 		{% if messages %}
 			{% for message in messages %}
 				{% if message.level == 40 %}

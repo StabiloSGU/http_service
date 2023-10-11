@@ -1,8 +1,10 @@
 {% extends "csv_import/index.html" %}
 {% block content %}
-<div>
-	<a href="{% url 'csv_import:uploads_add' %}">Upload new file</a>
-</div>
+{% if request.user.is_authenticated %}
+	<div>
+		<a href="{% url 'csv_import:uploads_add' %}">Upload new file</a>
+	</div>
+{% endif %}
 <h1>Uploads list</h1>
 {% if uploads_list %}
 	<ul>

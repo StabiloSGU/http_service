@@ -3,6 +3,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from csv_import.views import *
+
 app_name = "csv_import"
 
 urlpatterns = [
